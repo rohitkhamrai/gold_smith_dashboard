@@ -132,7 +132,7 @@ async def create_transaction(transaction: TransactionCreate):
     
     transaction_dict = transaction.dict()
     if transaction_dict["date"] is None:
-        transaction_dict["date"] = DateType.today()
+        transaction_dict["date"] = DateType.today().isoformat()
     
     transaction_dict["customer_name"] = customer["name"]
     transaction_obj = Transaction(**transaction_dict)
