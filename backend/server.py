@@ -59,7 +59,7 @@ class TransactionCreate(BaseModel):
     cash_in: float = 0.0
     labour_charge: float = 0.0
     remarks: Optional[str] = None
-    date: Optional[DateType] = None
+    date: Optional[str] = None
 
 class Job(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
