@@ -8,7 +8,7 @@ from pathlib import Path
 from pydantic import BaseModel, Field
 from typing import List, Optional
 import uuid
-from datetime import datetime, date
+from datetime import datetime, date as DateType
 from decimal import Decimal
 
 ROOT_DIR = Path(__file__).parent
@@ -42,7 +42,7 @@ class Transaction(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     customer_id: str
     customer_name: str
-    date: date = Field(default_factory=date.today)
+    date: DateType = Field(default_factory=DateType.today)
     work_description: str
     gold_in: float = 0.0  # grams received from customer
     gold_out: float = 0.0  # grams given back to customer
@@ -59,7 +59,7 @@ class TransactionCreate(BaseModel):
     cash_in: float = 0.0
     labour_charge: float = 0.0
     remarks: Optional[str] = None
-    date: Optional[date] = None
+    date: Optional[DateType] = None
 
 class Job(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
@@ -67,14 +67,14 @@ class Job(BaseModel):
     customer_name: str
     work_description: str
     status: str  # "In Progress", "Completed", "Delivered"
-    expected_delivery: Optional[date] = None
+    expected_delivery: Optional[DateType] = None
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
 class JobCreate(BaseModel):
     customer_id: str
     work_description: str
     status: str = "In Progress"
-    expected_delivery: Optional[date] = None
+    expected_delivery: Optional[DateType] = None
 
 class DashboardStats(BaseModel):
     total_gold_balance: float
@@ -132,7 +132,7 @@ async def create_transaction(transaction: TransactionCreate):
     
     transaction_dict = transaction.dict()
     if transaction_dict["date"] is None:
-        transaction_dict["date"] = date.today()
+        transaction_dict["date"] = DateType.today()
     
     transaction_dict["customer_name"] = customer["name"]
     transaction_obj = Transaction(**transaction_dict)
