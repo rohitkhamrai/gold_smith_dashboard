@@ -693,15 +693,24 @@ function App() {
                   {job.expected_delivery ? new Date(job.expected_delivery).toLocaleDateString() : '-'}
                 </td>
                 <td className="border border-gray-300 px-4 py-2">
-                  <select
-                    className="border rounded px-2 py-1 text-sm"
-                    value={job.status}
-                    onChange={(e) => updateJobStatus(job.id, e.target.value)}
-                  >
-                    <option value="In Progress">In Progress</option>
-                    <option value="Completed">Completed</option>
-                    <option value="Delivered">Delivered</option>
-                  </select>
+                  <div className="flex gap-2">
+                    <select
+                      className="border rounded px-2 py-1 text-sm"
+                      value={job.status}
+                      onChange={(e) => updateJobStatus(job.id, e.target.value)}
+                    >
+                      <option value="In Progress">In Progress</option>
+                      <option value="Completed">Completed</option>
+                      <option value="Delivered">Delivered</option>
+                    </select>
+                    <button
+                      onClick={() => deleteJob(job.id, job.work_description)}
+                      disabled={loading}
+                      className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600 disabled:opacity-50 text-sm"
+                    >
+                      🗑️
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}
