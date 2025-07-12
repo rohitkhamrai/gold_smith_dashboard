@@ -432,6 +432,7 @@ function App() {
                   <th className="border border-gray-300 px-2 py-2 text-left">Cash In</th>
                   <th className="border border-gray-300 px-2 py-2 text-left">Labour</th>
                   <th className="border border-gray-300 px-2 py-2 text-left">Remarks</th>
+                  <th className="border border-gray-300 px-2 py-2 text-left">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -444,6 +445,15 @@ function App() {
                     <td className="border border-gray-300 px-2 py-2 text-green-600">₹{transaction.cash_in}</td>
                     <td className="border border-gray-300 px-2 py-2 text-blue-600">₹{transaction.labour_charge}</td>
                     <td className="border border-gray-300 px-2 py-2">{transaction.remarks || '-'}</td>
+                    <td className="border border-gray-300 px-2 py-2">
+                      <button
+                        onClick={() => deleteTransaction(transaction.id, transaction.work_description)}
+                        disabled={loading}
+                        className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600 disabled:opacity-50 text-xs"
+                      >
+                        🗑️
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
