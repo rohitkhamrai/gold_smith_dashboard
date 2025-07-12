@@ -219,68 +219,185 @@ function App() {
     </div>
   );
 
-  const renderCustomers = () => (
-    <div className="bg-white rounded-lg shadow-lg p-6">
-      <h2 className="text-2xl font-bold text-gray-800 mb-6">👥 Customer Management</h2>
-      
-      {/* Add Customer Form */}
-      <form onSubmit={handleCustomerSubmit} className="mb-6 bg-gray-50 p-4 rounded-lg">
-        <h3 className="text-lg font-semibold mb-4">Add New Customer</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <input
-            type="text"
-            placeholder="Customer Name"
-            className="border rounded-lg px-3 py-2"
-            value={customerForm.name}
-            onChange={(e) => setCustomerForm({...customerForm, name: e.target.value})}
-            required
-          />
-          <input
-            type="tel"
-            placeholder="Phone Number"
-            className="border rounded-lg px-3 py-2"
-            value={customerForm.phone}
-            onChange={(e) => setCustomerForm({...customerForm, phone: e.target.value})}
-          />
-          <input
-            type="text"
-            placeholder="Notes"
-            className="border rounded-lg px-3 py-2"
-            value={customerForm.notes}
-            onChange={(e) => setCustomerForm({...customerForm, notes: e.target.value})}
-          />
-        </div>
-        <button 
-          type="submit" 
-          disabled={loading}
-          className="mt-4 bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 disabled:opacity-50"
-        >
-          {loading ? 'Adding...' : 'Add Customer'}
-        </button>
-      </form>
+  const renderCustomers = () => {
+    // If a customer is selected, show customer detail view
+    if (selectedCustomer) {
+      return renderCustomerDetail();
+    }
 
-      {/* Customer List */}
-      <div className="overflow-x-auto">
-        <table className="w-full border-collapse border border-gray-300">
-          <thead className="bg-gray-100">
-            <tr>
-              <th className="border border-gray-300 px-4 py-2 text-left">Name</th>
-              <th className="border border-gray-300 px-4 py-2 text-left">Phone</th>
-              <th className="border border-gray-300 px-4 py-2 text-left">Notes</th>
-              <th className="border border-gray-300 px-4 py-2 text-left">Added</th>
-            </tr>
-          </thead>
-          <tbody>
-            {customers.map((customer) => (
-              <tr key={customer.id} className="hover:bg-gray-50">
-                <td className="border border-gray-300 px-4 py-2 font-medium">{customer.name}</td>
-                <td className="border border-gray-300 px-4 py-2">{customer.phone || '-'}</td>
-                <td className="border border-gray-300 px-4 py-2">{customer.notes || '-'}</td>
-                <td className="border border-gray-300 px-4 py-2">{new Date(customer.created_at).toLocaleDateString()}</td>
+    return (
+      <div className="bg-white rounded-lg shadow-lg p-6">
+        <h2 className="text-2xl font-bold text-gray-800 mb-6">👥 Customer Management</h2>
+        
+        {/* Add Customer Form */}
+        <form onSubmit={handleCustomerSubmit} className="mb-6 bg-gray-50 p-4 rounded-lg">
+          <h3 className="text-lg font-semibold mb-4">Add New Customer</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <input
+              type="text"
+              placeholder="Customer Name"
+              className="border rounded-lg px-3 py-2"
+              value={customerForm.name}
+              onChange={(e) => setCustomerForm({...customerForm, name: e.target.value})}
+              required
+            />
+            <input
+              type="tel"
+              placeholder="Phone Number"
+              className="border rounded-lg px-3 py-2"
+              value={customerForm.phone}
+              onChange={(e) => setCustomerForm({...customerForm, phone: e.target.value})}
+            />
+            <input
+              type="text"
+              placeholder="Notes"
+              className="border rounded-lg px-3 py-2"
+              value={customerForm.notes}
+              onChange={(e) => setCustomerForm({...customerForm, notes: e.target.value})}
+            />
+          </div>
+          <button 
+            type="submit" 
+            disabled={loading}
+            className="mt-4 bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 disabled:opacity-50"
+          >
+            {loading ? 'Adding...' : 'Add Customer'}
+          </button>
+        </form>
+
+        {/* Customer List */}
+        <div className="overflow-x-auto">
+          <p className="text-sm text-gray-600 mb-4">💡 Click on any customer name to view their transaction history</p>
+          <table className="w-full border-collapse border border-gray-300">
+            <thead className="bg-gray-100">
+              <tr>
+                <th className="border border-gray-300 px-4 py-2 text-left">Name</th>
+                <th className="border border-gray-300 px-4 py-2 text-left">Phone</th>
+                <th className="border border-gray-300 px-4 py-2 text-left">Notes</th>
+                <th className="border border-gray-300 px-4 py-2 text-left">Added</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {customers.map((customer) => (
+                <tr key={customer.id} className="hover:bg-gray-50">
+                  <td className="border border-gray-300 px-4 py-2">
+                    <button
+                      onClick={() => handleCustomerClick(customer)}
+                      className="font-medium text-blue-600 hover:text-blue-800 hover:underline text-left"
+                    >
+                      {customer.name}
+                    </button>
+                  </td>
+                  <td className="border border-gray-300 px-4 py-2">{customer.phone || '-'}</td>
+                  <td className="border border-gray-300 px-4 py-2">{customer.notes || '-'}</td>
+                  <td className="border border-gray-300 px-4 py-2">{new Date(customer.created_at).toLocaleDateString()}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    );
+  };
+
+  const renderCustomerDetail = () => (
+    <div className="bg-white rounded-lg shadow-lg p-6">
+      {/* Header with back button */}
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <button
+            onClick={handleBackToCustomers}
+            className="flex items-center text-blue-600 hover:text-blue-800 mb-2"
+          >
+            ← Back to Customers
+          </button>
+          <h2 className="text-2xl font-bold text-gray-800">📋 {selectedCustomer.name}'s Account</h2>
+          <p className="text-gray-600">
+            {selectedCustomer.phone && `📞 ${selectedCustomer.phone}`}
+            {selectedCustomer.notes && ` • ${selectedCustomer.notes}`}
+          </p>
+        </div>
+      </div>
+
+      {/* Customer Balance Summary */}
+      {customerBalance && (
+        <div className="grid grid-cols-2 gap-4 mb-6">
+          <div className="bg-yellow-100 p-4 rounded-lg text-center">
+            <div className="text-2xl font-bold text-yellow-600">{customerBalance.gold_balance}g</div>
+            <div className="text-sm text-gray-600">Gold Balance</div>
+          </div>
+          <div className="bg-green-100 p-4 rounded-lg text-center">
+            <div className="text-2xl font-bold text-green-600">₹{customerBalance.money_balance}</div>
+            <div className="text-sm text-gray-600">Money Balance</div>
+          </div>
+        </div>
+      )}
+
+      {/* Customer Transactions */}
+      <div>
+        <h3 className="text-lg font-semibold mb-4">Transaction History ({customerTransactions.length} transactions)</h3>
+        {customerTransactions.length === 0 ? (
+          <div className="text-center py-8 text-gray-500">
+            <p>No transactions found for this customer</p>
+            <button 
+              onClick={() => setActiveTab('transactions')}
+              className="mt-2 text-blue-600 hover:text-blue-800"
+            >
+              Add first transaction →
+            </button>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse border border-gray-300 text-sm">
+              <thead className="bg-gray-100">
+                <tr>
+                  <th className="border border-gray-300 px-2 py-2 text-left">Date</th>
+                  <th className="border border-gray-300 px-2 py-2 text-left">Work Description</th>
+                  <th className="border border-gray-300 px-2 py-2 text-left">Gold In</th>
+                  <th className="border border-gray-300 px-2 py-2 text-left">Gold Out</th>
+                  <th className="border border-gray-300 px-2 py-2 text-left">Cash In</th>
+                  <th className="border border-gray-300 px-2 py-2 text-left">Labour</th>
+                  <th className="border border-gray-300 px-2 py-2 text-left">Remarks</th>
+                </tr>
+              </thead>
+              <tbody>
+                {customerTransactions.map((transaction) => (
+                  <tr key={transaction.id} className="hover:bg-gray-50">
+                    <td className="border border-gray-300 px-2 py-2">{new Date(transaction.date).toLocaleDateString()}</td>
+                    <td className="border border-gray-300 px-2 py-2 font-medium">{transaction.work_description}</td>
+                    <td className="border border-gray-300 px-2 py-2 text-yellow-600">{transaction.gold_in}g</td>
+                    <td className="border border-gray-300 px-2 py-2 text-red-600">{transaction.gold_out}g</td>
+                    <td className="border border-gray-300 px-2 py-2 text-green-600">₹{transaction.cash_in}</td>
+                    <td className="border border-gray-300 px-2 py-2 text-blue-600">₹{transaction.labour_charge}</td>
+                    <td className="border border-gray-300 px-2 py-2">{transaction.remarks || '-'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      {/* Quick Actions */}
+      <div className="mt-6 flex gap-4">
+        <button 
+          onClick={() => {
+            setTransactionForm({...transactionForm, customer_id: selectedCustomer.id});
+            setActiveTab('transactions');
+          }}
+          className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600"
+        >
+          Add Transaction
+        </button>
+        <button 
+          onClick={() => {
+            setJobForm({...jobForm, customer_id: selectedCustomer.id});
+            setActiveTab('jobs');
+          }}
+          className="bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600"
+        >
+          Create Job
+        </button>
       </div>
     </div>
   );
