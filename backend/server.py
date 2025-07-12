@@ -42,7 +42,7 @@ class Transaction(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     customer_id: str
     customer_name: str
-    date: DateType = Field(default_factory=DateType.today)
+    date: str = Field(default_factory=lambda: DateType.today().isoformat())
     work_description: str
     gold_in: float = 0.0  # grams received from customer
     gold_out: float = 0.0  # grams given back to customer
