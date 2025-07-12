@@ -117,10 +117,40 @@ async def update_customer(customer_id: str, customer_update: CustomerCreate):
 
 @api_router.delete("/customers/{customer_id}")
 async def delete_customer(customer_id: str):
+    # Check if customer has transactions
+    transactions = await db.transactions.find({"customer_id": customer_id}).to_list(10)
+    if transactions:
+        raise HTTPException(
+            status_code=400, 
+            detail=f"Cannot delete customer. Customer has {len(transactions)} transaction(s). Delete transactions first."
+        )
+    
+    # Check if customer has jobs
+    jobs = await db.jobs.find({"customer_id": customer_id}).to_list(10)
+    if jobs:
+        raise HTTPException(
+            status_code=400, 
+            detail=f"Cannot delete customer. Customer has {len(jobs)} job(s). Delete jobs first."
+        )
+    
     result = await db.customers.delete_one({"id": customer_id})
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Customer not found")
     return {"message": "Customer deleted successfully"}
+
+@api_router.delete("/transactions/{transaction_id}")
+async def delete_transaction(transaction_id: str):
+    result = await db.transactions.delete_one({"id": transaction_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Transaction not found")
+    return {"message": "Transaction deleted successfully"}
+
+@api_router.delete("/jobs/{job_id}")
+async def delete_job(job_id: str):
+    result = await db.jobs.delete_one({"id": job_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Job not found")
+    return {"message": "Job deleted successfully"}
 
 # Transaction Routes
 @api_router.post("/transactions", response_model=Transaction)
