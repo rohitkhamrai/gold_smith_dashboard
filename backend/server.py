@@ -74,7 +74,7 @@ class JobCreate(BaseModel):
     customer_id: str
     work_description: str
     status: str = "In Progress"
-    expected_delivery: Optional[DateType] = None
+    expected_delivery: Optional[str] = None
 
 class DashboardStats(BaseModel):
     total_gold_balance: float
