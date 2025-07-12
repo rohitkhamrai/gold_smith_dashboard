@@ -71,6 +71,30 @@ function App() {
     }
   };
 
+  const fetchCustomerDetails = async (customerId) => {
+    try {
+      const [transactionsResponse, balanceResponse] = await Promise.all([
+        axios.get(`${API}/transactions?customer_id=${customerId}`),
+        axios.get(`${API}/customer/${customerId}/balance`)
+      ]);
+      setCustomerTransactions(transactionsResponse.data);
+      setCustomerBalance(balanceResponse.data);
+    } catch (error) {
+      console.error('Error fetching customer details:', error);
+    }
+  };
+
+  const handleCustomerClick = (customer) => {
+    setSelectedCustomer(customer);
+    fetchCustomerDetails(customer.id);
+  };
+
+  const handleBackToCustomers = () => {
+    setSelectedCustomer(null);
+    setCustomerTransactions([]);
+    setCustomerBalance(null);
+  };
+
   useEffect(() => {
     fetchDashboardStats();
     fetchCustomers();
