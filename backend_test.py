@@ -601,7 +601,16 @@ def main():
         tester.test_create_job,
         tester.test_get_jobs,
         tester.test_update_job_status,
-        tester.test_dashboard_after_operations
+        tester.test_dashboard_after_operations,
+        
+        # DELETE FUNCTIONALITY TESTS
+        tester.test_delete_customer_with_transactions_should_fail,
+        tester.test_delete_customer_with_jobs_should_fail,
+        tester.test_delete_transaction,
+        tester.test_delete_job,
+        tester.test_delete_customer_after_cleanup,
+        tester.test_delete_nonexistent_entities,
+        tester.test_dashboard_after_deletions
     ]
     
     for test in tests:
