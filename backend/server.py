@@ -67,7 +67,7 @@ class Job(BaseModel):
     customer_name: str
     work_description: str
     status: str  # "In Progress", "Completed", "Delivered"
-    expected_delivery: Optional[DateType] = None
+    expected_delivery: Optional[str] = None
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
 class JobCreate(BaseModel):
