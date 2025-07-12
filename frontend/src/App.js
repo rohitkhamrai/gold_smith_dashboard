@@ -12,6 +12,9 @@ function App() {
   const [jobs, setJobs] = useState([]);
   const [dashboardStats, setDashboardStats] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [selectedCustomer, setSelectedCustomer] = useState(null);
+  const [customerTransactions, setCustomerTransactions] = useState([]);
+  const [customerBalance, setCustomerBalance] = useState(null);
   
   // Form states
   const [customerForm, setCustomerForm] = useState({ name: '', phone: '', notes: '' });
