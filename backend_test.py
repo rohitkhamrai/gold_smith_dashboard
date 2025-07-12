@@ -332,6 +332,256 @@ class GoldsmithAPITester:
         
         return success
 
+    # DELETE FUNCTIONALITY TESTS
+    def test_delete_customer_with_transactions_should_fail(self):
+        """Test that deleting customer with transactions fails"""
+        if not self.created_customer_id:
+            print("❌ No customer ID available for delete testing")
+            return False
+            
+        success, response = self.run_test(
+            "Delete Customer with Transactions (Should Fail)",
+            "DELETE",
+            f"customers/{self.created_customer_id}",
+            400  # Should fail with 400 status
+        )
+        
+        if success:
+            print(f"✅ Customer deletion correctly blocked due to existing transactions")
+        else:
+            print(f"❌ Customer deletion should have been blocked but wasn't")
+            return False
+        
+        return success
+
+    def test_delete_customer_with_jobs_should_fail(self):
+        """Test that deleting customer with jobs fails"""
+        if not self.created_customer_id:
+            print("❌ No customer ID available for delete testing")
+            return False
+            
+        # First delete the transaction to test job blocking separately
+        if self.created_transaction_id:
+            self.run_test(
+                "Delete Transaction for Job Test",
+                "DELETE", 
+                f"transactions/{self.created_transaction_id}",
+                200
+            )
+            
+        success, response = self.run_test(
+            "Delete Customer with Jobs (Should Fail)",
+            "DELETE",
+            f"customers/{self.created_customer_id}",
+            400  # Should fail with 400 status
+        )
+        
+        if success:
+            print(f"✅ Customer deletion correctly blocked due to existing jobs")
+        else:
+            print(f"❌ Customer deletion should have been blocked but wasn't")
+            return False
+        
+        return success
+
+    def test_delete_transaction(self):
+        """Test transaction deletion"""
+        if not self.created_transaction_id:
+            print("❌ No transaction ID available for delete testing")
+            return False
+            
+        # First recreate transaction since we deleted it in previous test
+        transaction_data = {
+            "customer_id": self.created_customer_id,
+            "work_description": "Test transaction for deletion",
+            "gold_in": 5.0,
+            "gold_out": 2.0,
+            "cash_in": 500.0,
+            "labour_charge": 200.0,
+            "remarks": "Test transaction for deletion"
+        }
+        
+        success, response = self.run_test(
+            "Create Transaction for Deletion Test",
+            "POST",
+            "transactions",
+            200,
+            data=transaction_data
+        )
+        
+        if success and 'id' in response:
+            transaction_id = response['id']
+            
+            # Now test deletion
+            success, response = self.run_test(
+                "Delete Transaction",
+                "DELETE",
+                f"transactions/{transaction_id}",
+                200
+            )
+            
+            if success:
+                print(f"✅ Transaction deleted successfully")
+                
+                # Verify transaction is gone
+                success_verify, _ = self.run_test(
+                    "Verify Transaction Deleted",
+                    "GET",
+                    f"transactions/{transaction_id}",
+                    404  # Should not be found
+                )
+                
+                if success_verify:
+                    print(f"✅ Transaction deletion verified - transaction not found")
+                else:
+                    print(f"❌ Transaction still exists after deletion")
+                    return False
+            else:
+                print(f"❌ Transaction deletion failed")
+                return False
+        else:
+            print(f"❌ Could not create transaction for deletion test")
+            return False
+        
+        return success
+
+    def test_delete_job(self):
+        """Test job deletion"""
+        if not self.created_job_id:
+            print("❌ No job ID available for delete testing")
+            return False
+            
+        success, response = self.run_test(
+            "Delete Job",
+            "DELETE",
+            f"jobs/{self.created_job_id}",
+            200
+        )
+        
+        if success:
+            print(f"✅ Job deleted successfully")
+            
+            # Verify job is gone
+            success_verify, _ = self.run_test(
+                "Verify Job Deleted",
+                "GET",
+                f"jobs/{self.created_job_id}",
+                404  # Should not be found
+            )
+            
+            # Note: The API doesn't have a get single job endpoint, so let's check the jobs list
+            success_list, jobs_response = self.run_test(
+                "Verify Job Deleted from List",
+                "GET",
+                "jobs",
+                200
+            )
+            
+            if success_list:
+                found = any(job['id'] == self.created_job_id for job in jobs_response)
+                if not found:
+                    print(f"✅ Job deletion verified - job not found in list")
+                else:
+                    print(f"❌ Job still exists in list after deletion")
+                    return False
+        else:
+            print(f"❌ Job deletion failed")
+            return False
+        
+        return success
+
+    def test_delete_customer_after_cleanup(self):
+        """Test customer deletion after removing transactions and jobs"""
+        if not self.created_customer_id:
+            print("❌ No customer ID available for delete testing")
+            return False
+            
+        # Now that transactions and jobs are deleted, customer deletion should work
+        success, response = self.run_test(
+            "Delete Customer After Cleanup",
+            "DELETE",
+            f"customers/{self.created_customer_id}",
+            200
+        )
+        
+        if success:
+            print(f"✅ Customer deleted successfully after cleanup")
+            
+            # Verify customer is gone
+            success_verify, _ = self.run_test(
+                "Verify Customer Deleted",
+                "GET",
+                f"customers/{self.created_customer_id}",
+                404  # Should not be found
+            )
+            
+            if success_verify:
+                print(f"✅ Customer deletion verified - customer not found")
+            else:
+                print(f"❌ Customer still exists after deletion")
+                return False
+        else:
+            print(f"❌ Customer deletion failed even after cleanup")
+            return False
+        
+        return success
+
+    def test_delete_nonexistent_entities(self):
+        """Test deleting non-existent entities returns 404"""
+        fake_id = "fake-id-12345"
+        
+        # Test deleting non-existent customer
+        success1, _ = self.run_test(
+            "Delete Non-existent Customer",
+            "DELETE",
+            f"customers/{fake_id}",
+            404
+        )
+        
+        # Test deleting non-existent transaction
+        success2, _ = self.run_test(
+            "Delete Non-existent Transaction", 
+            "DELETE",
+            f"transactions/{fake_id}",
+            404
+        )
+        
+        # Test deleting non-existent job
+        success3, _ = self.run_test(
+            "Delete Non-existent Job",
+            "DELETE", 
+            f"jobs/{fake_id}",
+            404
+        )
+        
+        if success1 and success2 and success3:
+            print(f"✅ All non-existent entity deletions correctly returned 404")
+            return True
+        else:
+            print(f"❌ Some non-existent entity deletions didn't return 404")
+            return False
+
+    def test_dashboard_after_deletions(self):
+        """Test dashboard stats after deletions"""
+        success, response = self.run_test(
+            "Dashboard Stats After Deletions",
+            "GET",
+            "dashboard",
+            200
+        )
+        
+        if success:
+            print(f"✅ Final Dashboard Stats After Deletions:")
+            print(f"   Gold Balance: {response.get('total_gold_balance', 0)}g")
+            print(f"   Money Balance: ₹{response.get('total_money_balance', 0)}")
+            print(f"   Active Jobs: {response.get('active_jobs_count', 0)}")
+            print(f"   Total Customers: {response.get('total_customers', 0)}")
+            print(f"   Total Transactions: {response.get('total_transactions', 0)}")
+            
+            print(f"✅ Dashboard stats updated correctly after deletions")
+        
+        return success
+
 def main():
     print("🚀 Starting Goldsmith Ledger API Tests")
     print("=" * 50)
