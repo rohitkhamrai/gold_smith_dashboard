@@ -188,6 +188,70 @@ function App() {
     }
   };
 
+  // Delete functions
+  const deleteCustomer = async (customerId, customerName) => {
+    if (window.confirm(`Are you sure you want to delete customer "${customerName}"?\n\nThis action cannot be undone. Make sure the customer has no transactions or jobs.`)) {
+      setLoading(true);
+      try {
+        await axios.delete(`${API}/customers/${customerId}`);
+        fetchCustomers();
+        fetchDashboardStats();
+        alert('Customer deleted successfully!');
+        // If we're viewing this customer's details, go back to customer list
+        if (selectedCustomer && selectedCustomer.id === customerId) {
+          handleBackToCustomers();
+        }
+      } catch (error) {
+        console.error('Error deleting customer:', error);
+        if (error.response && error.response.data && error.response.data.detail) {
+          alert(`Error: ${error.response.data.detail}`);
+        } else {
+          alert('Error deleting customer. Please try again.');
+        }
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
+
+  const deleteTransaction = async (transactionId, workDescription) => {
+    if (window.confirm(`Are you sure you want to delete this transaction?\n\nWork: "${workDescription}"\n\nThis action cannot be undone and will affect balance calculations.`)) {
+      setLoading(true);
+      try {
+        await axios.delete(`${API}/transactions/${transactionId}`);
+        fetchTransactions();
+        fetchDashboardStats();
+        // Refresh customer details if viewing customer detail
+        if (selectedCustomer) {
+          fetchCustomerDetails(selectedCustomer.id);
+        }
+        alert('Transaction deleted successfully!');
+      } catch (error) {
+        console.error('Error deleting transaction:', error);
+        alert('Error deleting transaction. Please try again.');
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
+
+  const deleteJob = async (jobId, workDescription) => {
+    if (window.confirm(`Are you sure you want to delete this job?\n\nWork: "${workDescription}"\n\nThis action cannot be undone.`)) {
+      setLoading(true);
+      try {
+        await axios.delete(`${API}/jobs/${jobId}`);
+        fetchJobs();
+        fetchDashboardStats();
+        alert('Job deleted successfully!');
+      } catch (error) {
+        console.error('Error deleting job:', error);
+        alert('Error deleting job. Please try again.');
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
+
   // Render components
   const renderDashboard = () => (
     <div className="bg-white rounded-lg shadow-lg p-6">
