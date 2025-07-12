@@ -339,6 +339,7 @@ function App() {
                 <th className="border border-gray-300 px-4 py-2 text-left">Phone</th>
                 <th className="border border-gray-300 px-4 py-2 text-left">Notes</th>
                 <th className="border border-gray-300 px-4 py-2 text-left">Added</th>
+                <th className="border border-gray-300 px-4 py-2 text-left">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -355,6 +356,15 @@ function App() {
                   <td className="border border-gray-300 px-4 py-2">{customer.phone || '-'}</td>
                   <td className="border border-gray-300 px-4 py-2">{customer.notes || '-'}</td>
                   <td className="border border-gray-300 px-4 py-2">{new Date(customer.created_at).toLocaleDateString()}</td>
+                  <td className="border border-gray-300 px-4 py-2">
+                    <button
+                      onClick={() => deleteCustomer(customer.id, customer.name)}
+                      disabled={loading}
+                      className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 disabled:opacity-50 text-sm"
+                    >
+                      🗑️ Delete
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>
