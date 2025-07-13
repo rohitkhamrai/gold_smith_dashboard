@@ -1,0 +1,111 @@
+{
+  "customers": [
+    {
+      "id": "demo_001",
+      "name": "Rajesh Kumar",
+      "phone": "9876543210",
+      "notes": "Regular customer, prefers 22k gold",
+      "createdAt": "2024-01-15T10:30:00.000Z"
+    },
+    {
+      "id": "demo_002", 
+      "name": "Priya Sharma",
+      "phone": "9876543211",
+      "notes": "Wedding jewelry specialist",
+      "createdAt": "2024-02-10T14:20:00.000Z"
+    },
+    {
+      "id": "demo_003",
+      "name": "Mohammed Ali",
+      "phone": "9876543212", 
+      "notes": "Prefers antique designs",
+      "createdAt": "2024-02-25T09:15:00.000Z"
+    }
+  ],
+  "transactions": [
+    {
+      "id": "trans_001",
+      "customerId": "demo_001",
+      "workDescription": "Gold ring repair and polishing",
+      "date": "2024-03-01",
+      "goldIn": 8.5,
+      "goldOut": 8.3,
+      "cashIn": 2000,
+      "labourCharge": 500,
+      "remarks": "Customer satisfied with work",
+      "createdAt": "2024-03-01T11:00:00.000Z"
+    },
+    {
+      "id": "trans_002", 
+      "customerId": "demo_002",
+      "workDescription": "Wedding necklace creation",
+      "date": "2024-03-05",
+      "goldIn": 45.2,
+      "goldOut": 0,
+      "cashIn": 15000,
+      "labourCharge": 3000,
+      "remarks": "Advance payment received, work in progress",
+      "createdAt": "2024-03-05T16:30:00.000Z"
+    },
+    {
+      "id": "trans_003",
+      "customerId": "demo_003", 
+      "workDescription": "Antique earrings restoration",
+      "date": "2024-03-10",
+      "goldIn": 12.8,
+      "goldOut": 12.8,
+      "cashIn": 0,
+      "labourCharge": 1200,
+      "remarks": "Restoration complete, ready for pickup",
+      "createdAt": "2024-03-10T13:45:00.000Z"
+    },
+    {
+      "id": "trans_004",
+      "customerId": "demo_001",
+      "workDescription": "Gold chain weight adjustment", 
+      "date": "2024-03-12",
+      "goldIn": 0,
+      "goldOut": 2.1,
+      "cashIn": 800,
+      "labourCharge": 300,
+      "remarks": "Reduced chain weight as requested",
+      "createdAt": "2024-03-12T10:20:00.000Z"
+    }
+  ],
+  "jobs": [
+    {
+      "id": "job_001",
+      "customerId": "demo_002",
+      "workDescription": "Wedding necklace with matching earrings",
+      "status": "In Progress",
+      "expectedDelivery": "2024-03-20",
+      "createdAt": "2024-03-05T16:30:00.000Z"
+    },
+    {
+      "id": "job_002",
+      "customerId": "demo_003",
+      "workDescription": "Custom bracelet design",
+      "status": "Completed", 
+      "expectedDelivery": "2024-03-15",
+      "createdAt": "2024-03-08T12:00:00.000Z"
+    },
+    {
+      "id": "job_003",
+      "customerId": "demo_001",
+      "workDescription": "Gold pendant engraving",
+      "status": "Delivered",
+      "expectedDelivery": "2024-03-12",
+      "createdAt": "2024-03-10T09:30:00.000Z"
+    }
+  ],
+  "businessSettings": {
+    "businessName": "Sharma Jewellers",
+    "businessAddress": "123 Market Street, Jewelry Lane, Mumbai 400001",
+    "businessPhone": "+91 22 1234 5678",
+    "currencySymbol": "₹",
+    "autoBackup": false,
+    "lastBackup": null
+  },
+  "exportDate": "2024-03-15T12:00:00.000Z",
+  "version": "2.0"
+}
