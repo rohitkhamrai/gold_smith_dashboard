@@ -1504,6 +1504,9 @@
             updateTransactionsList();
             updateJobsList();
             updateSettings();
+            
+            // Check for auto backup
+            setTimeout(checkAutoBackup, 2000);
         }
 
         // Start the app when page loads
