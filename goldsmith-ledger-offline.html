@@ -1150,8 +1150,9 @@
                 customers: customers,
                 transactions: transactions,
                 jobs: jobs,
+                businessSettings: businessSettings,
                 exportDate: new Date().toISOString(),
-                version: '1.0'
+                version: '2.0'
             };
             
             const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
@@ -1159,6 +1160,64 @@
             const a = document.createElement('a');
             a.href = url;
             a.download = `goldsmith-ledger-backup-${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            // Update last backup time if auto backup is enabled
+            if (businessSettings.autoBackup) {
+                businessSettings.lastBackup = new Date().toISOString();
+                saveData();
+                updateSettings();
+            }
+        }
+
+        function exportCSV() {
+            let csvContent = "Date,Customer,Work Description,Gold In (g),Gold Out (g),Cash In,Labour Charge,Remarks\n";
+            
+            transactions.forEach(transaction => {
+                const customer = customers.find(c => c.id === transaction.customerId);
+                csvContent += `"${transaction.date}","${customer ? customer.name : 'Unknown'}","${transaction.workDescription}","${transaction.goldIn || 0}","${transaction.goldOut || 0}","${transaction.cashIn || 0}","${transaction.labourCharge || 0}","${transaction.remarks || ''}"\n`;
+            });
+            
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `goldsmith-transactions-${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function exportCustomerReport() {
+            const reportData = customers.map(customer => {
+                const customerTransactions = transactions.filter(t => t.customerId === customer.id);
+                let goldBalance = 0;
+                let moneyBalance = 0;
+                
+                customerTransactions.forEach(t => {
+                    goldBalance += (parseFloat(t.goldIn) || 0) - (parseFloat(t.goldOut) || 0);
+                    moneyBalance += (parseFloat(t.cashIn) || 0) + (parseFloat(t.labourCharge) || 0);
+                });
+                
+                return {
+                    name: customer.name,
+                    phone: customer.phone || '',
+                    goldBalance: goldBalance.toFixed(3),
+                    moneyBalance: moneyBalance.toFixed(2),
+                    totalTransactions: customerTransactions.length
+                };
+            });
+            
+            let csvContent = "Customer Name,Phone,Gold Balance (g),Money Balance,Total Transactions\n";
+            reportData.forEach(customer => {
+                csvContent += `"${customer.name}","${customer.phone}","${customer.goldBalance}","${customer.moneyBalance}","${customer.totalTransactions}"\n`;
+            });
+            
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `customer-balances-${new Date().toISOString().split('T')[0]}.csv`;
             a.click();
             URL.revokeObjectURL(url);
         }
@@ -1172,7 +1231,59 @@
                 return;
             }
             
-            if (!confirm('This will replace all current data. Are you sure you want to continue?')) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    
+                    if (data.customers && data.transactions && data.jobs) {
+                        // Merge data (avoid duplicates by checking IDs)
+                        data.customers.forEach(customer => {
+                            if (!customers.find(c => c.id === customer.id)) {
+                                customers.push(customer);
+                            }
+                        });
+                        
+                        data.transactions.forEach(transaction => {
+                            if (!transactions.find(t => t.id === transaction.id)) {
+                                transactions.push(transaction);
+                            }
+                        });
+                        
+                        data.jobs.forEach(job => {
+                            if (!jobs.find(j => j.id === job.id)) {
+                                jobs.push(job);
+                            }
+                        });
+                        
+                        if (data.businessSettings) {
+                            businessSettings = {...businessSettings, ...data.businessSettings};
+                        }
+                        
+                        saveData();
+                        refreshAllViews();
+                        alert('Data imported successfully!');
+                    } else {
+                        alert('Invalid file format');
+                    }
+                } catch (error) {
+                    alert('Error reading file: ' + error.message);
+                }
+            };
+            reader.readAsText(file);
+            fileInput.value = '';
+        }
+
+        function replaceData() {
+            const fileInput = document.getElementById('replace-file');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                alert('Please select a file to import');
+                return;
+            }
+            
+            if (!confirm('This will replace ALL current data. Are you sure you want to continue?')) {
                 return;
             }
             
@@ -1185,15 +1296,14 @@
                         customers = data.customers;
                         transactions = data.transactions;
                         jobs = data.jobs;
+                        
+                        if (data.businessSettings) {
+                            businessSettings = data.businessSettings;
+                        }
+                        
                         saveData();
-                        
-                        updateDashboard();
-                        updateCustomersList();
-                        updateTransactionsList();
-                        updateJobsList();
-                        updateSettings();
-                        
-                        alert('Data imported successfully!');
+                        refreshAllViews();
+                        alert('Data replaced successfully!');
                     } else {
                         alert('Invalid file format');
                     }
@@ -1203,6 +1313,14 @@
             };
             reader.readAsText(file);
             fileInput.value = '';
+        }
+
+        function refreshAllViews() {
+            updateDashboard();
+            updateCustomersList();
+            updateTransactionsList();
+            updateJobsList();
+            updateSettings();
         }
 
         function exportPDF() {
