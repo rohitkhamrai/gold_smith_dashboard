@@ -880,7 +880,8 @@
             const tbody = document.getElementById('transactions-list');
             tbody.innerHTML = '';
 
-            const sortedTransactions = [...transactions].sort((a, b) => new Date(b.date) - new Date(a.date));
+            const displayTransactions = filteredTransactions.length > 0 ? filteredTransactions : transactions;
+            const sortedTransactions = [...displayTransactions].sort((a, b) => new Date(b.date) - new Date(a.date));
 
             sortedTransactions.forEach(transaction => {
                 const customer = customers.find(c => c.id === transaction.customerId);
@@ -899,6 +900,33 @@
                     </td>
                 `;
             });
+        }
+
+        function filterTransactions() {
+            const fromDate = document.getElementById('filter-date-from').value;
+            const toDate = document.getElementById('filter-date-to').value;
+            
+            if (!fromDate && !toDate) {
+                filteredTransactions = [];
+            } else {
+                filteredTransactions = transactions.filter(transaction => {
+                    const transactionDate = new Date(transaction.date);
+                    const from = fromDate ? new Date(fromDate) : new Date('1900-01-01');
+                    const to = toDate ? new Date(toDate) : new Date('2099-12-31');
+                    return transactionDate >= from && transactionDate <= to;
+                });
+            }
+            updateTransactionsList();
+        }
+
+        function clearFilters() {
+            document.getElementById('search-customers').value = '';
+            document.getElementById('filter-date-from').value = '';
+            document.getElementById('filter-date-to').value = '';
+            filteredCustomers = [];
+            filteredTransactions = [];
+            updateCustomersList();
+            updateTransactionsList();
         }
 
         // Job functions
