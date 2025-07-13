@@ -713,6 +713,7 @@
             localStorage.setItem('goldsmith_customers', JSON.stringify(customers));
             localStorage.setItem('goldsmith_transactions', JSON.stringify(transactions));
             localStorage.setItem('goldsmith_jobs', JSON.stringify(jobs));
+            localStorage.setItem('goldsmith_business_settings', JSON.stringify(businessSettings));
         }
 
         function formatDate(date) {
@@ -720,7 +721,20 @@
         }
 
         function formatCurrency(amount) {
-            return '₹' + parseFloat(amount || 0).toFixed(2);
+            return businessSettings.currencySymbol + parseFloat(amount || 0).toFixed(2);
+        }
+
+        function calculateDataSize() {
+            const data = {
+                customers: customers,
+                transactions: transactions,
+                jobs: jobs,
+                businessSettings: businessSettings
+            };
+            const sizeInBytes = new Blob([JSON.stringify(data)]).size;
+            if (sizeInBytes < 1024) return sizeInBytes + ' B';
+            if (sizeInBytes < 1024 * 1024) return (sizeInBytes / 1024).toFixed(1) + ' KB';
+            return (sizeInBytes / (1024 * 1024)).toFixed(1) + ' MB';
         }
 
         // Navigation
