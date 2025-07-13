@@ -693,7 +693,16 @@
         let customers = JSON.parse(localStorage.getItem('goldsmith_customers') || '[]');
         let transactions = JSON.parse(localStorage.getItem('goldsmith_transactions') || '[]');
         let jobs = JSON.parse(localStorage.getItem('goldsmith_jobs') || '[]');
+        let businessSettings = JSON.parse(localStorage.getItem('goldsmith_business_settings') || '{}');
         let currentCustomer = null;
+        let filteredCustomers = [];
+        let filteredTransactions = [];
+
+        // Initialize business settings defaults
+        if (!businessSettings.currencySymbol) businessSettings.currencySymbol = '₹';
+        if (!businessSettings.businessName) businessSettings.businessName = '';
+        if (!businessSettings.businessAddress) businessSettings.businessAddress = '';
+        if (!businessSettings.businessPhone) businessSettings.businessPhone = '';
 
         // Utility functions
         function generateId() {
