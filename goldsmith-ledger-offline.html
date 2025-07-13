@@ -786,7 +786,9 @@
             const tbody = document.getElementById('customers-list');
             tbody.innerHTML = '';
 
-            customers.forEach(customer => {
+            const displayCustomers = filteredCustomers.length > 0 ? filteredCustomers : customers;
+
+            displayCustomers.forEach(customer => {
                 const row = tbody.insertRow();
                 row.innerHTML = `
                     <td><button onclick="showCustomerDetail('${customer.id}')" class="text-blue font-medium">${customer.name}</button></td>
@@ -800,6 +802,19 @@
             });
 
             updateCustomerDropdowns();
+        }
+
+        function searchCustomers() {
+            const searchTerm = document.getElementById('search-customers').value.toLowerCase();
+            if (searchTerm === '') {
+                filteredCustomers = [];
+            } else {
+                filteredCustomers = customers.filter(customer => 
+                    customer.name.toLowerCase().includes(searchTerm) ||
+                    (customer.phone && customer.phone.includes(searchTerm))
+                );
+            }
+            updateCustomersList();
         }
 
         function updateCustomerDropdowns() {
