@@ -1341,6 +1341,12 @@
                 totalMoney += (parseFloat(t.cashIn) || 0) + (parseFloat(t.labourCharge) || 0);
             });
 
+            const businessInfo = businessSettings.businessName ? 
+                `<h1>${businessSettings.businessName}</h1>
+                 <p>${businessSettings.businessAddress || ''}</p>
+                 <p>${businessSettings.businessPhone || ''}</p>` : 
+                '<h1>✨ Goldsmith Ledger Report</h1>';
+
             return `
                 <!DOCTYPE html>
                 <html>
@@ -1354,11 +1360,12 @@
                         th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
                         th { background-color: #f5f5f5; }
                         .text-right { text-align: right; }
+                        .customer-summary { margin-bottom: 30px; }
                     </style>
                 </head>
                 <body>
                     <div class="header">
-                        <h1>✨ Goldsmith Ledger Report</h1>
+                        ${businessInfo}
                         <p>Generated on ${new Date().toLocaleString()}</p>
                     </div>
                     
@@ -1369,6 +1376,41 @@
                         <p><strong>Total Customers:</strong> ${customers.length}</p>
                         <p><strong>Total Transactions:</strong> ${transactions.length}</p>
                         <p><strong>Total Jobs:</strong> ${jobs.length}</p>
+                    </div>
+                    
+                    <div class="customer-summary">
+                        <h2>Customer Balances</h2>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Customer</th>
+                                    <th>Gold Balance</th>
+                                    <th>Money Balance</th>
+                                    <th>Transactions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${customers.map(customer => {
+                                    const customerTransactions = transactions.filter(t => t.customerId === customer.id);
+                                    let goldBalance = 0;
+                                    let moneyBalance = 0;
+                                    
+                                    customerTransactions.forEach(t => {
+                                        goldBalance += (parseFloat(t.goldIn) || 0) - (parseFloat(t.goldOut) || 0);
+                                        moneyBalance += (parseFloat(t.cashIn) || 0) + (parseFloat(t.labourCharge) || 0);
+                                    });
+                                    
+                                    return `
+                                        <tr>
+                                            <td>${customer.name}</td>
+                                            <td class="text-right">${goldBalance.toFixed(3)}g</td>
+                                            <td class="text-right">${formatCurrency(moneyBalance)}</td>
+                                            <td class="text-right">${customerTransactions.length}</td>
+                                        </tr>
+                                    `;
+                                }).join('')}
+                            </tbody>
+                        </table>
                     </div>
                     
                     <h2>Recent Transactions</h2>
@@ -1385,7 +1427,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            ${transactions.slice(-10).map(t => {
+                            ${transactions.slice(-20).map(t => {
                                 const customer = customers.find(c => c.id === t.customerId);
                                 return `
                                     <tr>
@@ -1396,6 +1438,31 @@
                                         <td class="text-right">${t.goldOut || 0}g</td>
                                         <td class="text-right">${formatCurrency(t.cashIn)}</td>
                                         <td class="text-right">${formatCurrency(t.labourCharge)}</td>
+                                    </tr>
+                                `;
+                            }).join('')}
+                        </tbody>
+                    </table>
+                    
+                    <h2>Active Jobs</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Customer</th>
+                                <th>Work Description</th>
+                                <th>Status</th>
+                                <th>Expected Delivery</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${jobs.filter(j => j.status !== 'Delivered').map(job => {
+                                const customer = customers.find(c => c.id === job.customerId);
+                                return `
+                                    <tr>
+                                        <td>${customer ? customer.name : 'Unknown'}</td>
+                                        <td>${job.workDescription}</td>
+                                        <td>${job.status}</td>
+                                        <td>${job.expectedDelivery ? formatDate(job.expectedDelivery) : '-'}</td>
                                     </tr>
                                 `;
                             }).join('')}
