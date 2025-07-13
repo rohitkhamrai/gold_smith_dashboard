@@ -974,6 +974,60 @@
             document.getElementById('settings-customers').textContent = customers.length;
             document.getElementById('settings-transactions').textContent = transactions.length;
             document.getElementById('settings-jobs').textContent = jobs.length;
+            document.getElementById('settings-data-size').textContent = calculateDataSize();
+            
+            // Load business settings
+            document.getElementById('business-name').value = businessSettings.businessName || '';
+            document.getElementById('business-address').value = businessSettings.businessAddress || '';
+            document.getElementById('business-phone').value = businessSettings.businessPhone || '';
+            document.getElementById('currency-symbol').value = businessSettings.currencySymbol || '₹';
+            
+            // Load auto backup setting
+            document.getElementById('auto-backup').checked = businessSettings.autoBackup || false;
+            document.getElementById('last-backup').textContent = businessSettings.lastBackup ? 
+                formatDate(businessSettings.lastBackup) : 'Never';
+        }
+
+        function saveBusinessSettings() {
+            businessSettings.businessName = document.getElementById('business-name').value;
+            businessSettings.businessAddress = document.getElementById('business-address').value;
+            businessSettings.businessPhone = document.getElementById('business-phone').value;
+            businessSettings.currencySymbol = document.getElementById('currency-symbol').value;
+            saveData();
+            
+            // Update dashboard and other displays
+            updateDashboard();
+            updateTransactionsList();
+            updateJobsList();
+            
+            alert('Business settings saved successfully!');
+        }
+
+        function toggleAutoBackup() {
+            businessSettings.autoBackup = document.getElementById('auto-backup').checked;
+            saveData();
+            
+            if (businessSettings.autoBackup) {
+                alert('Auto backup enabled! Your data will be automatically exported weekly.');
+                checkAutoBackup();
+            }
+        }
+
+        function checkAutoBackup() {
+            if (!businessSettings.autoBackup) return;
+            
+            const lastBackup = businessSettings.lastBackup ? new Date(businessSettings.lastBackup) : new Date(0);
+            const weekAgo = new Date();
+            weekAgo.setDate(weekAgo.getDate() - 7);
+            
+            if (lastBackup < weekAgo) {
+                if (confirm('It\'s time for your weekly backup! Would you like to export your data now?')) {
+                    exportData();
+                    businessSettings.lastBackup = new Date().toISOString();
+                    saveData();
+                    updateSettings();
+                }
+            }
         }
 
         // Form handlers
